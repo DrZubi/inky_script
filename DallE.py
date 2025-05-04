@@ -14,7 +14,7 @@ def generate_random_prompt():
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", 
-             "content": "Create a concise image prompt (max 5 words), specifying art style, subject, and details."
+             "content": "Create a concise image prompt for a E-white paper display, focusing on a professional, informative visual. Specify the art style, subject matter, and relevant details to convey clear data insights or abstract concepts in a formal tone."
             },
         ]
     )
@@ -34,7 +34,7 @@ def generate_image():
         response = openai.Image.create(
             prompt=prompt,
             n=1,
-            size="800 x 480"
+            size="1024 x 1024"
         )
         
         # Get the image URL

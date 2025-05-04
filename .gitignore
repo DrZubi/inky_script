@@ -3,8 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Exclude credentials
+# Exclude credentials and pictures
 credentials.py
+/pictures/*
+
 
 # C extensions
 *.so

@@ -4,9 +4,13 @@ import requests
 from io import BytesIO
 import re
 import pathlib
+from inky import InkyImpression  # Use InkyImpression for color E Ink displays
+import time
+import argparse
 
 from credentials import credentials
 
+# Set OpenAI API key
 openai.api_key = credentials()
 
 def generate_random_prompt():
@@ -62,8 +66,10 @@ def generate_image():
         return None
 
 def clear_image():
-    inky = auto(ask_user=True, verbose=True)
+    # Initialize the InkyImpression display (use the correct size)
+    inky = InkyImpression("red")  # Change "red" to your preferred color ("black", "red", or "yellow")
     
+    # Clear the display by setting all pixels to white
     for _ in range(2):
         for y in range(inky.height):
             for x in range(inky.width):
@@ -73,22 +79,27 @@ def clear_image():
         time.sleep(1.0)
 
 def display_image(image_path):
+    # Set up argument parser for saturation
     parser = argparse.ArgumentParser()
-    
     parser.add_argument("--saturation", "-s", type=float, default=0.5, help="Colour palette saturation")
     
-    inky = auto(ask_user=True, verbose=True)
+    # Initialize the InkyImpression display (use the correct size)
+    inky = InkyImpression("red")  # Change "red" to your preferred color ("black", "red", or "yellow")
     args, _ = parser.parse_known_args()
     saturation = args.saturation
 
+    # Open and resize the image to fit the Inky display resolution
     image = Image.open(image_path)
     resized_image = image.resize(inky.resolution)
     
     try:
+        # Attempt to display the image with the specified saturation
         inky.set_image(resized_image, saturation=saturation)
     except TypeError:
+        # If saturation isn't supported, display without it
         inky.set_image(resized_image)
     
+    # Show the image on the Inky display
     inky.show()
 
 # Generate the image and get its path

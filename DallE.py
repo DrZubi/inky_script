@@ -1,16 +1,22 @@
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 import openai
 import requests
 from io import BytesIO
 import re
-import pathlib
-from inky import InkyImpression  # Import InkyImpression for large E Ink displays
-import time
 import argparse
+import pathlib
+import sys
 
-from credentials import credentials
+from PIL import Image
 
-# Set OpenAI API key
+from inky.auto import auto
+import time
+
+from inky.auto import auto
+from inky.inky_uc8159 import CLEAN
+
+from .credentials import credentials
+
 openai.api_key = credentials()
 
 def generate_random_prompt():
@@ -18,7 +24,7 @@ def generate_random_prompt():
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", 
-             "content": "Create an image prompt specifying the art style, subject, and details (8 words max)."
+             "content": "Create a concise image prompt (max 5 words), specifying art style, subject, and details."
             },
         ]
     )
@@ -38,7 +44,7 @@ def generate_image():
         response = openai.Image.create(
             prompt=prompt,
             n=1,
-            size="1024x1024"
+            size="800 x 480"
         )
         
         # Get the image URL
@@ -48,16 +54,37 @@ def generate_image():
         # Download the image
         image_response = requests.get(image_url)
         image = Image.open(BytesIO(image_response.content))
-
-        # Ensure the 'pictures' directory exists
-        script_dir = pathlib.Path(__file__).parent
-        pictures_dir = script_dir / "pictures"
-        pictures_dir.mkdir(parents=True, exist_ok=True)
-
-        # Save the image in the 'pictures' directory
+        
+        # Create a banner with the prompt text
+        font = ImageFont.load_default()
+        try:
+            font = ImageFont.truetype("arial.ttf", 40)
+        except IOError:
+            print("Custom font not found; using default font.")
+    
+        draw = ImageDraw.Draw(image)
+        banner_height = 150
+        banner = Image.new("RGBA", (image.width, banner_height), (255, 255, 255, 100))
+        draw_banner = ImageDraw.Draw(banner)
+        text = prompt
+        
+        # Center the text on the banner
+        bbox = draw_banner.textbbox((0, 0), text, font=font)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
+        x_position = (banner.width - text_width) / 2
+        y_position = (banner.height - text_height) / 2
+        draw_banner.text((x_position, y_position), text, font=font, fill=(0, 0, 0, 255))
+        
+        # Create final image with banner
+        final_image = Image.new("RGBA", (image.width, image.height + banner_height))
+        final_image.paste(image.convert("RGBA"), (0, 0))
+        final_image.paste(banner, (0, image.height))
+        
+        # Save the final image
         sanitized_filename = sanitize_filename(prompt)
-        final_image_path = pictures_dir / f"{sanitized_filename}.jpg"
-        image.save(final_image_path)
+        final_image_path = f"{sanitized_filename}.jpg"
+        final_image.save(final_image_path)
         
         return final_image_path
 
@@ -66,10 +93,8 @@ def generate_image():
         return None
 
 def clear_image():
-    # Initialize the InkyImpression display (use the correct size)
-    inky = InkyImpression("red")  # Change "red" to your preferred color ("black", "red", or "yellow")
+    inky = auto(ask_user=True, verbose=True)
     
-    # Clear the display by setting all pixels to white
     for _ in range(2):
         for y in range(inky.height):
             for x in range(inky.width):
@@ -79,27 +104,22 @@ def clear_image():
         time.sleep(1.0)
 
 def display_image(image_path):
-    # Set up argument parser for saturation
     parser = argparse.ArgumentParser()
+    
     parser.add_argument("--saturation", "-s", type=float, default=0.5, help="Colour palette saturation")
     
-    # Initialize the InkyImpression display (use the correct size)
-    inky = InkyImpression("red")  # Change "red" to your preferred color ("black", "red", or "yellow")
+    inky = auto(ask_user=True, verbose=True)
     args, _ = parser.parse_known_args()
     saturation = args.saturation
 
-    # Open and resize the image to fit the Inky display resolution
     image = Image.open(image_path)
     resized_image = image.resize(inky.resolution)
     
     try:
-        # Attempt to display the image with the specified saturation
         inky.set_image(resized_image, saturation=saturation)
     except TypeError:
-        # If saturation isn't supported, display without it
         inky.set_image(resized_image)
     
-    # Show the image on the Inky display
     inky.show()
 
 # Generate the image and get its path

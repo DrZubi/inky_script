@@ -14,8 +14,9 @@ import time
 
 from inky.auto import auto
 from inky.inky_uc8159 import CLEAN
+from credentials import credentials
 
-
+openai.api_key = credentials()
 
 def generate_random_prompt():
     completion = openai.ChatCompletion.create(

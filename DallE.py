@@ -5,7 +5,7 @@ from io import BytesIO
 import re
 import pathlib
 
-from .credentials import credentials
+from credentials import credentials
 
 openai.api_key = credentials()
 

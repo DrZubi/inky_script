@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Exclude credentials
+credentials.py
+
 # C extensions
 *.so
 

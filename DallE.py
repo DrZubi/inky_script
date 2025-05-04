@@ -4,7 +4,7 @@ import requests
 from io import BytesIO
 import re
 import pathlib
-from inky import InkyImpression  # Use InkyImpression for color E Ink displays
+from inky import InkyPHAT  # Use InkyPHAT for your Inky Impressions display
 import time
 import argparse
 
@@ -66,8 +66,8 @@ def generate_image():
         return None
 
 def clear_image():
-    # Initialize the InkyImpression display (use the correct size)
-    inky = InkyImpression("red")  # Change "red" to your preferred color ("black", "red", or "yellow")
+    # Initialize the InkyPHAT display (use the correct size)
+    inky = InkyPHAT("red")  # Change "red" to your preferred color ("black", "red", or "yellow")
     
     # Clear the display by setting all pixels to white
     for _ in range(2):
@@ -83,8 +83,8 @@ def display_image(image_path):
     parser = argparse.ArgumentParser()
     parser.add_argument("--saturation", "-s", type=float, default=0.5, help="Colour palette saturation")
     
-    # Initialize the InkyImpression display (use the correct size)
-    inky = InkyImpression("red")  # Change "red" to your preferred color ("black", "red", or "yellow")
+    # Initialize the InkyPHAT display (use the correct size)
+    inky = InkyPHAT("red")  # Change "red" to your preferred color ("black", "red", or "yellow")
     args, _ = parser.parse_known_args()
     saturation = args.saturation
 

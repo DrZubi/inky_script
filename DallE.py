@@ -54,36 +54,14 @@ def generate_image():
         image_response = requests.get(image_url)
         image = Image.open(BytesIO(image_response.content))
         
-        # Create a banner with the prompt text
-        font = ImageFont.load_default()
-        try:
-            font = ImageFont.truetype("arial.ttf", 40)
-        except IOError:
-            print("Custom font not found; using default font.")
-        
-        draw = ImageDraw.Draw(image)
-        banner_height = 150
-        banner = Image.new("RGBA", (image.width, banner_height), (255, 255, 255, 100))
-        draw_banner = ImageDraw.Draw(banner)
-        text = prompt
-        
-        # Center the text on the banner
-        bbox = draw_banner.textbbox((0, 0), text, font=font)
-        text_width = bbox[2] - bbox[0]
-        text_height = 40
-        x_position = (banner.width - text_width) / 2
-        y_position = (banner.height - text_height) / 2
-        draw_banner.text((x_position, y_position), text, font=font, fill=(0, 0, 0, 255))
-        
-        # Create final image with banner
-        final_image = Image.new("RGBA", (image.width, image.height + banner_height))
-        final_image.paste(image.convert("RGBA"), (0, 0))
-        final_image.paste(banner, (0, image.height))
-        
-        # Save the final image
-        sanitized_filename = sanitize_filename(prompt)
-        final_image_path = f"{sanitized_filename}.png"
-        final_image.save(final_image_path)
+        # Ensure the 'pictures' directory exists next to this script
+        pictures_dir = pathlib.Path(__file__).parent / "pictures"
+        pictures_dir.mkdir(parents=True, exist_ok=True)
+
+        # Save the image 
+        sanitized_filename = sanitize_filename(prompt) + ".png"
+        final_image_path = pictures_dir / sanitized_filename
+        image.save(final_image_path)
         
         return final_image_path
 

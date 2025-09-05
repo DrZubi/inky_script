@@ -291,7 +291,16 @@ function loadImageGallery() {
                 imageItem.className = 'image-item';
                 imageItem.dataset.imageId = image.id;
                 
-                const imageSrc = image.filepath.includes('uploads') ? `/uploads/${image.filename}` : `/pictures/${image.filename}`;
+                // Determine correct image source URL
+                let imageSrc;
+                if (image.filepath.includes('uploads')) {
+                    imageSrc = `/uploads/${encodeURIComponent(image.filename)}`;
+                } else if (image.filepath.includes('pictures')) {
+                    imageSrc = `/pictures/${encodeURIComponent(image.filename)}`;
+                } else {
+                    // Fallback: try to determine from filepath
+                    imageSrc = `/${image.filepath.replace(/\\/g, '/')}`;
+                }
                 
                 imageItem.innerHTML = `
                     <div class="image-controls">

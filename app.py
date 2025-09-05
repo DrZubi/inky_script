@@ -517,7 +517,14 @@ def albums():
     conn = get_db_connection()
     
     if request.method == 'GET':
-        albums = conn.execute('SELECT * FROM albums ORDER BY name').fetchall()
+        # Get albums with image count
+        albums = conn.execute('''
+            SELECT a.*, COUNT(i.id) as image_count 
+            FROM albums a 
+            LEFT JOIN images i ON a.id = i.album_id 
+            GROUP BY a.id 
+            ORDER BY a.name
+        ''').fetchall()
         conn.close()
         return jsonify([dict(album) for album in albums])
     

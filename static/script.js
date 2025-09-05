@@ -267,6 +267,7 @@ function loadSettings() {
 }
 
 // Load and display image gallery
+// Load and display image gallery
 function loadImageGallery() {
     const albumSelect = document.getElementById('galleryAlbumSelect');
     const albumId = albumSelect ? albumSelect.value : '';
@@ -308,7 +309,7 @@ function loadImageGallery() {
                         <button class="secondary" onclick="showMoveImageModal(${image.id})" title="Move">📁</button>
                         <button class="danger" onclick="showDeleteModal(${image.id})" title="Delete">🗑️</button>
                     </div>
-                    <img src="${imageSrc}" alt="${image.filename}" onerror="this.src='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100\" height=\"100\"><rect width=\"100\" height=\"100\" fill=\"%23f0f0f0\"/><text x=\"50\" y=\"50\" text-anchor=\"middle\" dy=\".3em\" fill=\"%23999\">No Preview</text></svg>'">
+                    <img src="${imageSrc}" alt="${image.filename}" onerror="this.style.display='none'">
                     <div class="image-info">
                         <div class="image-filename">${image.original_filename}</div>
                         ${image.album_name ? `<div class="image-album">${image.album_name}</div>` : ''}

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inky Display Controller</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Inky Display Controller</h1>
+        
+        <div class="status-bar" id="statusBar">
+            <span class="status-indicator" id="modeIndicator"></span>
+            <span id="modeText">Loading...</span>
+            <span style="margin-left: 20px;">📁 <span id="imageCount">0</span> images</span>
+        </div>
+        
+        <div class="device-info" id="deviceInfo" style="display: none;">
+            <strong>Device Connected!</strong> Resolution: <span id="resolution"></span>
+        </div>
+
+        <!-- Mode Controls -->
+        <div class="card">
+            <h2>🔄 Display Modes</h2>
+            <div class="button-group">
+                <button id="startCycleBtn" class="success">🔄 Start Cycling</button>
+                <button id="startAiBtn" class="warning">🤖 Start AI Mode</button>
+                <button id="stopModesBtn" class="danger">⏹️ Stop All</button>
+            </div>
+            <p style="margin-top: 15px; color: #666;">
+                <strong>Cycling:</strong> Rotate through uploaded images<br>
+                <strong>AI Mode:</strong> Generate new AI images automatically<br>
+                <strong>Manual:</strong> Display specific images only
+            </p>
+        </div>
+
+        <!-- Settings -->
+        <div class="card">
+            <h2>⚙️ Settings</h2>
+            <div class="settings-grid">
+                <div class="form-group">
+                    <label for="cycleTime">Cycle Time (seconds):</label>
+                    <input type="number" id="cycleTime" min="5" max="3600" value="30">
+                </div>
+                <div class="form-group">
+                    <label for="aiInterval">AI Generation Interval (seconds):</label>
+                    <input type="number" id="aiInterval" min="60" max="7200" value="300">
+                </div>
+                <div class="form-group">
+                    <label for="globalSaturation">Global Saturation:</label>
+                    <input type="range" id="globalSaturation" min="0" max="1" step="0.1" value="0.5">
+                    <div class="range-display" id="globalSaturationValue">0.5</div>
+                </div>
+            </div>
+            <button id="saveSettingsBtn" class="secondary">💾 Save Settings</button>
+        </div>
+
+        <!-- Upload Image -->
+        <div class="card">
+            <h2>📁 Upload Image File</h2>
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="file">Choose an image file:</label>
+                        <input type="file" id="file" name="file" accept="image/*" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="uploadSaturation">Saturation:</label>
+                        <input type="range" id="uploadSaturation" name="saturation" min="0" max="1" step="0.1" value="0.5">
+                        <div class="range-display" id="uploadSaturationValue">0.5</div>
+                    </div>
+                </div>
+                <button type="submit">📤 Upload & Display</button>
+            </form>
+        </div>
+
+        <!-- Display from URL -->
+        <div class="card">
+            <h2>🌐 Display from URL</h2>
+            <form id="urlForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="imageUrl">Image URL:</label>
+                        <input type="url" id="imageUrl" name="url" placeholder="https://example.com/image.jpg" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="urlSaturation">Saturation:</label>
+                        <input type="range" id="urlSaturation" name="saturation" min="0" max="1" step="0.1" value="0.5">
+                        <div class="range-display" id="urlSaturationValue">0.5</div>
+                    </div>
+                </div>
+                <button type="submit">🌐 Download & Display</button>
+            </form>
+        </div>
+
+        <!-- Image Gallery -->
+        <div class="card">
+            <h2>🖼️ Image Gallery</h2>
+            <button id="refreshGalleryBtn" class="secondary">🔄 Refresh Gallery</button>
+            <div class="image-gallery" id="imageGallery">
+                <!-- Images will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Device Controls -->
+        <div class="card">
+            <h2>🔧 Device Controls</h2>
+            <div class="button-group">
+                <button id="testBtn" class="secondary">🔗 Test Connection</button>
+                <button id="clearBtn" class="danger">🧹 Clear Display</button>
+            </div>
+        </div>
+
+        <div id="status"></div>
+        <div id="preview"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "cycle_time": 30,
+  "saturation": 0.5,
+  "ai_generation_interval": 300,
+  "current_mode": "manual"
+}

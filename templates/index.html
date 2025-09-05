@@ -23,16 +23,46 @@
         <!-- Mode Controls -->
         <div class="card">
             <h2>🔄 Display Modes</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="cycleAlbumSelect">Album to Cycle:</label>
+                    <select id="cycleAlbumSelect" class="album-select">
+                        <option value="1">All Images</option>
+                    </select>
+                </div>
+            </div>
             <div class="button-group">
                 <button id="startCycleBtn" class="success">🔄 Start Cycling</button>
                 <button id="startAiBtn" class="warning">🤖 Start AI Mode</button>
                 <button id="stopModesBtn" class="danger">⏹️ Stop All</button>
             </div>
             <p style="margin-top: 15px; color: #666;">
-                <strong>Cycling:</strong> Rotate through uploaded images<br>
+                <strong>Cycling:</strong> Rotate through images in selected album<br>
                 <strong>AI Mode:</strong> Generate new AI images automatically<br>
                 <strong>Manual:</strong> Display specific images only
             </p>
+        </div>
+
+        <!-- Album Management -->
+        <div class="card">
+            <h2>📚 Album Management</h2>
+            <div class="album-controls">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="newAlbumName">Album Name:</label>
+                        <input type="text" id="newAlbumName" placeholder="Enter album name">
+                    </div>
+                    <div class="form-group">
+                        <label for="newAlbumDescription">Description (Optional):</label>
+                        <input type="text" id="newAlbumDescription" placeholder="Enter description">
+                    </div>
+                </div>
+                <button id="createAlbumBtn" class="secondary">➕ Create Album</button>
+            </div>
+            
+            <div class="album-list" id="albumList">
+                <!-- Albums will be loaded here -->
+            </div>
         </div>
 
         <!-- Settings -->
@@ -66,6 +96,12 @@
                         <input type="file" id="file" name="file" accept="image/*" required>
                     </div>
                     <div class="form-group">
+                        <label for="uploadAlbumSelect">Album:</label>
+                        <select id="uploadAlbumSelect" name="album_id" class="album-select">
+                            <option value="1">All Images</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label for="uploadSaturation">Saturation:</label>
                         <input type="range" id="uploadSaturation" name="saturation" min="0" max="1" step="0.1" value="0.5">
                         <div class="range-display" id="uploadSaturationValue">0.5</div>
@@ -85,6 +121,12 @@
                         <input type="url" id="imageUrl" name="url" placeholder="https://example.com/image.jpg" required>
                     </div>
                     <div class="form-group">
+                        <label for="urlAlbumSelect">Album:</label>
+                        <select id="urlAlbumSelect" name="album_id" class="album-select">
+                            <option value="1">All Images</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label for="urlSaturation">Saturation:</label>
                         <input type="range" id="urlSaturation" name="saturation" min="0" max="1" step="0.1" value="0.5">
                         <div class="range-display" id="urlSaturationValue">0.5</div>
@@ -97,7 +139,18 @@
         <!-- Image Gallery -->
         <div class="card">
             <h2>🖼️ Image Gallery</h2>
-            <button id="refreshGalleryBtn" class="secondary">🔄 Refresh Gallery</button>
+            <div class="gallery-controls">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="galleryAlbumSelect">Filter by Album:</label>
+                        <select id="galleryAlbumSelect" class="album-select">
+                            <option value="">All Images</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="refreshGalleryBtn" class="secondary">🔄 Refresh Gallery</button>
+            </div>
+            
             <div class="image-gallery" id="imageGallery">
                 <!-- Images will be loaded here -->
             </div>
@@ -114,6 +167,40 @@
 
         <div id="status"></div>
         <div id="preview"></div>
+    </div>
+
+    <!-- Image Context Menu -->
+    <div id="imageContextMenu" class="context-menu" style="display: none;">
+        <div class="context-menu-item" id="displayImageBtn">🖥️ Display</div>
+        <div class="context-menu-item" id="moveImageBtn">📁 Move to Album</div>
+        <div class="context-menu-item danger" id="deleteImageBtn">🗑️ Delete</div>
+    </div>
+
+    <!-- Move Image Modal -->
+    <div id="moveImageModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>Move Image to Album</h3>
+            <label for="moveToAlbumSelect">Select Album:</label>
+            <select id="moveToAlbumSelect" class="album-select">
+                <option value="1">All Images</option>
+            </select>
+            <div class="modal-buttons">
+                <button id="confirmMoveBtn" class="success">Move</button>
+                <button id="cancelMoveBtn" class="secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>Confirm Deletion</h3>
+            <p>Are you sure you want to delete this image? This action cannot be undone.</p>
+            <div class="modal-buttons">
+                <button id="confirmDeleteBtn" class="danger">Delete</button>
+                <button id="cancelDeleteBtn" class="secondary">Cancel</button>
+            </div>
+        </div>
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>

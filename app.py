@@ -747,6 +747,8 @@ def stop_modes():
 
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
+    global current_album_images
+    
     if request.method == 'GET':
         current_settings = load_settings()
         # Add current status information
@@ -768,7 +770,6 @@ def settings():
         save_settings(current_settings)
         
         # If we're changing album while cycling, reset the image list
-        global current_album_images
         if 'current_album' in data and cycling_active:
             current_album_images = []
         

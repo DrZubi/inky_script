@@ -45,6 +45,8 @@ os.makedirs(PICTURES_FOLDER, exist_ok=True)
 cycling_thread = None
 cycling_active = False
 ai_mode_active = False
+current_image_index = 0
+current_album_images = []
 
 # Default settings
 default_settings = {
@@ -52,7 +54,7 @@ default_settings = {
     'saturation': 0.5,
     'ai_generation_interval': 300,  # 5 minutes for AI images
     'current_mode': 'manual',  # manual, cycle, ai
-    'current_album': 'all'  # ID of currently cycling album
+    'current_album': 1  # ID of currently cycling album
 }
 
 def init_database():
@@ -280,56 +282,100 @@ def generate_ai_image():
 
 def cycling_worker():
     """Worker function for cycling through images"""
-    global cycling_active, ai_mode_active
+    global cycling_active, ai_mode_active, current_image_index, current_album_images
+    
+    print("Cycling worker started")
     
     while cycling_active or ai_mode_active:
-        settings = load_settings()
-        
-        if ai_mode_active:
-            # AI mode: generate new image
-            image_path, prompt = generate_ai_image()
-            if image_path:
-                display_image_on_inky(image_path, settings['saturation'])
-                print(f"Displayed AI image: {prompt}")
+        try:
+            settings = load_settings()
+            print(f"Worker loop - cycling_active: {cycling_active}, ai_mode_active: {ai_mode_active}")
             
-            # Wait for AI generation interval
-            for _ in range(int(settings['ai_generation_interval'])):
-                if not ai_mode_active:
-                    break
-                time.sleep(1)
+            if ai_mode_active:
+                # AI mode: generate new image
+                print("Generating AI image...")
+                image_path, prompt = generate_ai_image()
+                if image_path:
+                    display_image_on_inky(image_path, settings['saturation'])
+                    print(f"Displayed AI image: {prompt}")
+                else:
+                    print("Failed to generate AI image")
                 
-        elif cycling_active:
-            # Cycle mode: go through images in current album
-            current_album = settings.get('current_album', 1)
-            images = get_images_by_album(current_album)
-            
-            if images:
-                for image_data in images:
-                    if not cycling_active:
+                # Wait for AI generation interval
+                wait_time = int(settings['ai_generation_interval'])
+                print(f"Waiting {wait_time} seconds for next AI generation...")
+                for i in range(wait_time):
+                    if not ai_mode_active:
+                        print("AI mode stopped during wait")
                         break
+                    time.sleep(1)
                     
-                    display_image_on_inky(image_data['filepath'], settings['saturation'])
-                    print(f"Displayed: {image_data['filename']}")
+            elif cycling_active:
+                # Cycle mode: go through images in current album
+                current_album = settings.get('current_album', 1)
+                
+                # Refresh images list if empty or if album changed
+                if not current_album_images:
+                    current_album_images = get_images_by_album(current_album)
+                    current_image_index = 0
+                    print(f"Loaded {len(current_album_images)} images from album {current_album}")
+                
+                if current_album_images:
+                    # Get current image
+                    if current_image_index >= len(current_album_images):
+                        current_image_index = 0  # Loop back to start
+                    
+                    if current_image_index < len(current_album_images):
+                        image_data = current_album_images[current_image_index]
+                        
+                        # Check if file still exists
+                        if os.path.exists(image_data['filepath']):
+                            success = display_image_on_inky(image_data['filepath'], settings['saturation'])
+                            if success:
+                                print(f"Displayed image {current_image_index + 1}/{len(current_album_images)}: {image_data['filename']}")
+                            else:
+                                print(f"Failed to display: {image_data['filename']}")
+                        else:
+                            print(f"File not found: {image_data['filepath']}")
+                        
+                        current_image_index += 1
                     
                     # Wait for cycle time
-                    for _ in range(int(settings['cycle_time'])):
+                    wait_time = int(settings['cycle_time'])
+                    print(f"Waiting {wait_time} seconds before next image...")
+                    for i in range(wait_time):
                         if not cycling_active:
+                            print("Cycling stopped during wait")
                             break
                         time.sleep(1)
+                else:
+                    print("No images found for cycling")
+                    time.sleep(5)  # Wait before checking again
             else:
-                print("No images found for cycling")
                 break
+                
+        except Exception as e:
+            print(f"Error in cycling worker: {e}")
+            time.sleep(5)  # Wait before retrying
+    
+    print("Cycling worker stopped")
 
 def start_cycling():
     """Start the cycling thread"""
-    global cycling_thread, cycling_active
+    global cycling_thread, cycling_active, current_album_images, current_image_index
     
     if cycling_thread and cycling_thread.is_alive():
+        print("Cycling thread already active")
         return False
     
+    # Reset cycling state
+    current_album_images = []
+    current_image_index = 0
     cycling_active = True
+    
     cycling_thread = threading.Thread(target=cycling_worker, daemon=True)
     cycling_thread.start()
+    print("Started cycling thread")
     return True
 
 def start_ai_mode():
@@ -337,18 +383,23 @@ def start_ai_mode():
     global cycling_thread, ai_mode_active
     
     if cycling_thread and cycling_thread.is_alive():
+        print("Thread already active")
         return False
     
     ai_mode_active = True
     cycling_thread = threading.Thread(target=cycling_worker, daemon=True)
     cycling_thread.start()
+    print("Started AI mode thread")
     return True
 
 def stop_all_modes():
     """Stop cycling and AI modes"""
-    global cycling_active, ai_mode_active
+    global cycling_active, ai_mode_active, current_album_images, current_image_index
+    print("Stopping all modes...")
     cycling_active = False
     ai_mode_active = False
+    current_album_images = []
+    current_image_index = 0
 
 # Initialize database on startup
 init_database()
@@ -609,6 +660,10 @@ def move_image_to_album(image_id):
     conn.commit()
     conn.close()
     
+    # Reset cycling state if album is changed
+    global current_album_images
+    current_album_images = []
+    
     return jsonify({'message': 'Image moved successfully'})
 
 @app.route('/clear', methods=['POST'])
@@ -627,7 +682,7 @@ def clear():
 
 @app.route('/start_cycle', methods=['POST'])
 def start_cycle():
-    global cycling_active, ai_mode_active
+    global cycling_active, ai_mode_active, current_album_images
     
     if cycling_active:
         return jsonify({'error': 'Cycling is already active'}), 400
@@ -640,6 +695,9 @@ def start_cycle():
         stop_all_modes()
         time.sleep(1)  # Give time for threads to stop
     
+    # Clear current images to force reload
+    current_album_images = []
+    
     success = start_cycling()
     
     if success:
@@ -647,6 +705,7 @@ def start_cycle():
         settings['current_mode'] = 'cycle'
         settings['current_album'] = album_id
         save_settings(settings)
+        print(f"Cycle mode started for album {album_id}")
         return jsonify({'message': f'Started cycling through album {album_id}'})
     else:
         return jsonify({'error': 'Failed to start cycling'}), 500
@@ -671,6 +730,7 @@ def start_ai():
         settings = load_settings()
         settings['current_mode'] = 'ai'
         save_settings(settings)
+        print("AI mode started")
         return jsonify({'message': 'Started AI image generation mode'})
     else:
         return jsonify({'error': 'Failed to start AI mode'}), 500
@@ -688,7 +748,13 @@ def stop_modes():
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
     if request.method == 'GET':
-        return jsonify(load_settings())
+        current_settings = load_settings()
+        # Add current status information
+        current_settings['cycling_active'] = cycling_active
+        current_settings['ai_mode_active'] = ai_mode_active
+        current_settings['current_image_index'] = current_image_index
+        current_settings['total_images'] = len(current_album_images)
+        return jsonify(current_settings)
     
     elif request.method == 'POST':
         data = request.get_json()
@@ -700,15 +766,39 @@ def settings():
                 current_settings[key] = data[key]
         
         save_settings(current_settings)
+        
+        # If we're changing album while cycling, reset the image list
+        global current_album_images
+        if 'current_album' in data and cycling_active:
+            current_album_images = []
+        
         return jsonify({'message': 'Settings updated successfully'})
 
 @app.route('/status', methods=['GET'])
 def status():
+    settings = load_settings()
+    
+    # Get current album name
+    current_album_name = "All Images"
+    if settings.get('current_album') != 1:
+        conn = get_db_connection()
+        album = conn.execute('SELECT name FROM albums WHERE id = ?', (settings['current_album'],)).fetchone()
+        if album:
+            current_album_name = album['name']
+        conn.close()
+    
     return jsonify({
         'cycling_active': cycling_active,
         'ai_mode_active': ai_mode_active,
-        'settings': load_settings(),
-        'image_count': len(get_all_images())
+        'settings': settings,
+        'image_count': len(get_all_images()),
+        'current_mode': settings.get('current_mode', 'manual'),
+        'current_album_name': current_album_name,
+        'current_image_index': current_image_index + 1 if current_album_images else 0,
+        'total_album_images': len(current_album_images),
+        'cycle_time': settings.get('cycle_time', 30),
+        'ai_generation_interval': settings.get('ai_generation_interval', 300),
+        'saturation': settings.get('saturation', 0.5)
     })
 
 @app.route('/images', methods=['GET'])

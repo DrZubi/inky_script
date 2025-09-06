@@ -14,8 +14,8 @@ document.addEventListener('DOMContentLoaded', function() {
     updateStatusBar();
     testConnection();
     
-    // Auto-refresh status every 10 seconds
-    setInterval(updateStatusBar, 10000);
+    // Auto-refresh status every 5 seconds for better responsiveness
+    setInterval(updateStatusBar, 5000);
     
     // Close context menu on outside click
     document.addEventListener('click', function(e) {
@@ -221,15 +221,22 @@ function updateStatusBar() {
             
             imageCount.textContent = data.image_count;
             
+            // Update status based on current mode
             if (data.cycling_active) {
                 indicator.className = 'status-indicator status-active';
-                text.textContent = 'Cycling Mode Active';
+                const albumInfo = data.current_album_name || 'All Images';
+                const progressInfo = data.total_album_images > 0 ? 
+                    ` (${data.current_image_index}/${data.total_album_images})` : '';
+                text.innerHTML = `🔄 Cycling Mode: ${albumInfo}${progressInfo}<br>
+                    <small>⏱️ ${data.cycle_time}s intervals • 🎨 ${data.saturation} saturation</small>`;
             } else if (data.ai_mode_active) {
                 indicator.className = 'status-indicator status-active';
-                text.textContent = 'AI Generation Mode Active';
+                text.innerHTML = `🤖 AI Generation Mode Active<br>
+                    <small>⏱️ ${Math.floor(data.ai_generation_interval/60)}min intervals • 🎨 ${data.saturation} saturation</small>`;
             } else {
                 indicator.className = 'status-indicator status-inactive';
-                text.textContent = 'Manual Mode';
+                text.innerHTML = `⚡ Manual Mode<br>
+                    <small>🎨 ${data.saturation} saturation</small>`;
             }
             
             // Update button states
@@ -240,8 +247,29 @@ function updateStatusBar() {
             if (startCycleBtn) startCycleBtn.disabled = data.cycling_active;
             if (startAiBtn) startAiBtn.disabled = data.ai_mode_active;
             if (stopModesBtn) stopModesBtn.disabled = !data.cycling_active && !data.ai_mode_active;
+            
+            // Update settings display
+            currentSettings = data.settings;
+            updateSettingsDisplay(data);
         })
         .catch(error => console.error('Error updating status:', error));
+}
+
+// Update settings display with current values
+function updateSettingsDisplay(statusData) {
+    const cycleTime = document.getElementById('cycleTime');
+    const aiInterval = document.getElementById('aiInterval');
+    const globalSaturation = document.getElementById('globalSaturation');
+    const globalSaturationValue = document.getElementById('globalSaturationValue');
+    const cycleAlbumSelect = document.getElementById('cycleAlbumSelect');
+    
+    if (cycleTime) cycleTime.value = statusData.cycle_time || 30;
+    if (aiInterval) aiInterval.value = statusData.ai_generation_interval || 300;
+    if (globalSaturation) globalSaturation.value = statusData.saturation || 0.5;
+    if (globalSaturationValue) globalSaturationValue.textContent = statusData.saturation || 0.5;
+    if (cycleAlbumSelect && statusData.settings && statusData.settings.current_album) {
+        cycleAlbumSelect.value = statusData.settings.current_album;
+    }
 }
 
 // Load application settings
@@ -250,23 +278,16 @@ function loadSettings() {
         .then(response => response.json())
         .then(settings => {
             currentSettings = settings;
-            
-            const cycleTime = document.getElementById('cycleTime');
-            const aiInterval = document.getElementById('aiInterval');
-            const globalSaturation = document.getElementById('globalSaturation');
-            const globalSaturationValue = document.getElementById('globalSaturationValue');
-            const cycleAlbumSelect = document.getElementById('cycleAlbumSelect');
-            
-            if (cycleTime) cycleTime.value = settings.cycle_time;
-            if (aiInterval) aiInterval.value = settings.ai_generation_interval;
-            if (globalSaturation) globalSaturation.value = settings.saturation;
-            if (globalSaturationValue) globalSaturationValue.textContent = settings.saturation;
-            if (cycleAlbumSelect && settings.current_album) cycleAlbumSelect.value = settings.current_album;
+            updateSettingsDisplay({ 
+                cycle_time: settings.cycle_time,
+                ai_generation_interval: settings.ai_generation_interval,
+                saturation: settings.saturation,
+                settings: settings
+            });
         })
         .catch(error => console.error('Error loading settings:', error));
 }
 
-// Load and display image gallery
 // Load and display image gallery
 function loadImageGallery() {
     const albumSelect = document.getElementById('galleryAlbumSelect');
@@ -721,6 +742,7 @@ function setupEventListeners() {
                 if (response.ok) {
                     showStatus(data.message, 'success');
                     loadSettings();
+                    updateStatusBar();
                 } else {
                     showStatus(data.error || 'Failed to save settings', 'error');
                 }

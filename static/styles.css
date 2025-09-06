@@ -34,11 +34,17 @@ h1 {
 .status-bar {
     background: linear-gradient(135deg, #a8edea, #fed6e3);
     border-radius: 15px;
-    padding: 15px;
+    padding: 20px;
     margin-bottom: 25px;
     text-align: center;
     font-weight: 600;
     color: #333;
+    line-height: 1.4;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
 }
 
 .status-indicator {
@@ -47,14 +53,39 @@ h1 {
     height: 12px;
     border-radius: 50%;
     margin-right: 8px;
+    animation: pulse 2s infinite;
 }
 
 .status-active { 
-    background: #4ade80; 
+    background: #4ade80;
+    box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
 }
 
 .status-inactive { 
-    background: #ef4444; 
+    background: #ef4444;
+    animation: none;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.status-bar small {
+    font-size: 0.85em;
+    opacity: 0.8;
+    font-weight: 500;
+    margin-top: 5px;
 }
 
 .card {
@@ -163,12 +194,12 @@ button {
     margin-bottom: 10px;
 }
 
-button:hover {
+button:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
 }
 
-button:active {
+button:active:not(:disabled) {
     transform: translateY(0);
 }
 
@@ -192,6 +223,7 @@ button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
+    background: #ccc;
 }
 
 button:disabled:hover {
@@ -539,5 +571,10 @@ button:disabled:hover {
     
     .album-actions {
         justify-content: center;
+    }
+
+    .status-bar {
+        padding: 15px;
+        min-height: 60px;
     }
 }

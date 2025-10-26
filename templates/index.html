@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inky Display Controller</title>
+    <title>Display Controller</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>🎨 Inky Display Controller</h1>
+        <h1>Display Controller</h1>
         
         <div class="status-bar" id="statusBar">
             <span class="status-indicator" id="modeIndicator"></span>
             <span id="modeText">Loading...</span>
-            <span style="margin-left: 20px;">📁 <span id="imageCount">0</span> images</span>
+            <span style="margin-left: 20px;"><span id="imageCount">0</span> images in library</span>
         </div>
         
         <div class="device-info" id="deviceInfo" style="display: none;">
@@ -22,7 +22,7 @@
 
         <!-- Mode Controls -->
         <div class="card">
-            <h2>🔄 Display Modes</h2>
+            <h2>Display Modes</h2>
             <div class="form-row">
                 <div class="form-group">
                     <label for="cycleAlbumSelect">Album to Cycle:</label>
@@ -32,9 +32,9 @@
                 </div>
             </div>
             <div class="button-group">
-                <button id="startCycleBtn" class="success">🔄 Start Cycling</button>
-                <button id="startAiBtn" class="warning">🤖 Start AI Mode</button>
-                <button id="stopModesBtn" class="danger">⏹️ Stop All</button>
+                <button id="startCycleBtn" class="success">Start Cycling</button>
+                <button id="startAiBtn" class="warning">Start AI Mode</button>
+                <button id="stopModesBtn" class="danger">Stop All</button>
             </div>
             <p style="margin-top: 15px; color: #666;">
                 <strong>Cycling:</strong> Rotate through images in selected album<br>
@@ -45,7 +45,7 @@
 
         <!-- Album Management -->
         <div class="card">
-            <h2>📚 Album Management</h2>
+            <h2>Album Management</h2>
             <div class="album-controls">
                 <div class="form-row">
                     <div class="form-group">
@@ -57,7 +57,7 @@
                         <input type="text" id="newAlbumDescription" placeholder="Enter description">
                     </div>
                 </div>
-                <button id="createAlbumBtn" class="secondary">➕ Create Album</button>
+                <button id="createAlbumBtn" class="secondary">Create Album</button>
             </div>
             
             <div class="album-list" id="albumList">
@@ -67,7 +67,7 @@
 
         <!-- Settings -->
         <div class="card">
-            <h2>⚙️ Settings</h2>
+            <h2>Settings</h2>
             <div class="settings-grid">
                 <div class="form-group">
                     <label for="cycleTime">Cycle Time (seconds):</label>
@@ -83,12 +83,12 @@
                     <div class="range-display" id="globalSaturationValue">0.5</div>
                 </div>
             </div>
-            <button id="saveSettingsBtn" class="secondary">💾 Save Settings</button>
+            <button id="saveSettingsBtn" class="secondary">Save Settings</button>
         </div>
 
         <!-- Upload Image -->
         <div class="card">
-            <h2>📁 Upload Image File</h2>
+            <h2>Upload Image File</h2>
             <form id="uploadForm" enctype="multipart/form-data">
                 <div class="form-row">
                     <div class="form-group">
@@ -107,13 +107,13 @@
                         <div class="range-display" id="uploadSaturationValue">0.5</div>
                     </div>
                 </div>
-                <button type="submit">📤 Upload & Display</button>
+                <button type="submit">Upload & Display</button>
             </form>
         </div>
 
         <!-- Display from URL -->
         <div class="card">
-            <h2>🌐 Display from URL</h2>
+            <h2>Display from URL</h2>
             <form id="urlForm">
                 <div class="form-row">
                     <div class="form-group">
@@ -132,13 +132,13 @@
                         <div class="range-display" id="urlSaturationValue">0.5</div>
                     </div>
                 </div>
-                <button type="submit">🌐 Download & Display</button>
+                <button type="submit">Download & Display</button>
             </form>
         </div>
 
         <!-- Image Gallery -->
         <div class="card">
-            <h2>🖼️ Image Gallery</h2>
+            <h2>Image Gallery</h2>
             <div class="gallery-controls">
                 <div class="form-row">
                     <div class="form-group">
@@ -148,7 +148,7 @@
                         </select>
                     </div>
                 </div>
-                <button id="refreshGalleryBtn" class="secondary">🔄 Refresh Gallery</button>
+                <button id="refreshGalleryBtn" class="secondary">Refresh Gallery</button>
             </div>
             
             <div class="image-gallery" id="imageGallery">
@@ -158,10 +158,10 @@
 
         <!-- Device Controls -->
         <div class="card">
-            <h2>🔧 Device Controls</h2>
+            <h2>Device Controls</h2>
             <div class="button-group">
-                <button id="testBtn" class="secondary">🔗 Test Connection</button>
-                <button id="clearBtn" class="danger">🧹 Clear Display</button>
+                <button id="testBtn" class="secondary">Test Connection</button>
+                <button id="clearBtn" class="danger">Clear Display</button>
             </div>
         </div>
 
@@ -171,9 +171,9 @@
 
     <!-- Image Context Menu -->
     <div id="imageContextMenu" class="context-menu" style="display: none;">
-        <div class="context-menu-item" id="displayImageBtn">🖥️ Display</div>
-        <div class="context-menu-item" id="moveImageBtn">📁 Move to Album</div>
-        <div class="context-menu-item danger" id="deleteImageBtn">🗑️ Delete</div>
+        <div class="context-menu-item" id="displayImageBtn">Display</div>
+        <div class="context-menu-item" id="moveImageBtn">Move to Album</div>
+        <div class="context-menu-item danger" id="deleteImageBtn">Delete</div>
     </div>
 
     <!-- Move Image Modal -->

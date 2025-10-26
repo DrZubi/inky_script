@@ -138,7 +138,7 @@ function populateAlbumList() {
                 <div class="album-stats">${imageCount} images • Created ${formatDate(album.created_at)}</div>
             </div>
             <div class="album-actions">
-                ${album.id !== 1 ? `<button class="danger" onclick="deleteAlbum(${album.id})">🗑️ Delete</button>` : ''}
+                ${album.id !== 1 ? `<button class="danger" onclick="deleteAlbum(${album.id})">Delete Album</button>` : ''}
             </div>
         `;
         
@@ -225,18 +225,18 @@ function updateStatusBar() {
             if (data.cycling_active) {
                 indicator.className = 'status-indicator status-active';
                 const albumInfo = data.current_album_name || 'All Images';
-                const progressInfo = data.total_album_images > 0 ? 
+                const progressInfo = data.total_album_images > 0 ?
                     ` (${data.current_image_index}/${data.total_album_images})` : '';
-                text.innerHTML = `🔄 Cycling Mode: ${albumInfo}${progressInfo}<br>
-                    <small>⏱️ ${data.cycle_time}s intervals • 🎨 ${data.saturation} saturation</small>`;
+                text.innerHTML = `Cycling Mode: ${albumInfo}${progressInfo}<br>
+                    <small>${data.cycle_time}s intervals • ${data.saturation} saturation</small>`;
             } else if (data.ai_mode_active) {
                 indicator.className = 'status-indicator status-active';
-                text.innerHTML = `🤖 AI Generation Mode Active<br>
-                    <small>⏱️ ${Math.floor(data.ai_generation_interval/60)}min intervals • 🎨 ${data.saturation} saturation</small>`;
+                text.innerHTML = `AI Generation Mode Active<br>
+                    <small>${Math.floor(data.ai_generation_interval/60)}min intervals • ${data.saturation} saturation</small>`;
             } else {
                 indicator.className = 'status-indicator status-inactive';
-                text.innerHTML = `⚡ Manual Mode<br>
-                    <small>🎨 ${data.saturation} saturation</small>`;
+                text.innerHTML = `Manual Mode<br>
+                    <small>${data.saturation} saturation</small>`;
             }
             
             // Update button states
@@ -326,9 +326,9 @@ function loadImageGallery() {
                 
                 imageItem.innerHTML = `
                     <div class="image-controls">
-                        <button class="success" onclick="displayImageById(${image.id})" title="Display">🖥️</button>
-                        <button class="secondary" onclick="showMoveImageModal(${image.id})" title="Move">📁</button>
-                        <button class="danger" onclick="showDeleteModal(${image.id})" title="Delete">🗑️</button>
+                        <button class="success" onclick="displayImageById(${image.id})" title="Display">Display</button>
+                        <button class="secondary" onclick="showMoveImageModal(${image.id})" title="Move">Move</button>
+                        <button class="danger" onclick="showDeleteModal(${image.id})" title="Delete">Delete</button>
                     </div>
                     <img src="${imageSrc}" alt="${image.filename}" onerror="this.style.display='none'">
                     <div class="image-info">
